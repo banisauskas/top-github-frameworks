@@ -1,0 +1,33 @@
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:2.0.5.RELEASE")
+	}
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+bootJar {
+	baseName = 'top-github-frameworks'
+	version = '1.0'
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	compile("org.springframework.boot:spring-boot-starter:2.0.5.RELEASE")
+	compile("org.springframework:spring-web:5.0.9.RELEASE")
+	compile("com.fasterxml.jackson.core:jackson-databind:2.9.6")
+	testCompile("junit:junit:4.12")
+}
