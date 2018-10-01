@@ -1,6 +1,6 @@
 # Top GitHub Frameworks
 
-# -- Assigment --
+## -- Assignment --
 
 ## Functional Requirements
 
@@ -48,7 +48,7 @@ To summarize, your REST API should expose endpoints to:
 - Effectiveness of retrieving information from GitHub API
 - Simplicity of overall approach and lack of over-engineering
 
-# -- Implementation --
+## -- Implementation --
 
 GitHub HTML URLs:
 - https://github.com/topics/framework?l=java&o=desc&s=stars
@@ -65,3 +65,4 @@ Execute:
 References:
 - https://developer.github.com/v3/search/
 - https://github.com/FasterXML/jackson-annotations
+- https://www.baeldung.com/jackson-nested-values

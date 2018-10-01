@@ -2,23 +2,33 @@ package domain;
 
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /** GitHub repository */
 public class Repository {
 
-	/** Repository name */
+	/** Name of repository */
 	private String name;
+
+	/** Name of repository owner */
+	@JsonIgnore
+	private String ownerLogin;
 
 	/** Repository description */
 	private String description;
 
 	/** Repository license name */
+	@JsonIgnore
 	private String licenseName;
 
 	/** Repository URL */
 	@JsonProperty("html_url")
 	private String htmlUrl;
+
+	/** Number of stars */
+	@JsonProperty("stargazers_count")
+	private int stargazersCount;
 
 	public String getName() {
 		return name;
@@ -26,6 +36,21 @@ public class Repository {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	@JsonProperty("owner")
+	private void unpackOwner(Map<String, String> owner) {
+		if (owner != null) {
+			ownerLogin = owner.get("login");
+		}
+	}
+
+	public String getOwnerLogin() {
+		return ownerLogin;
+	}
+
+	public void setOwnerLogin(String ownerLogin) {
+		this.ownerLogin = ownerLogin;
 	}
 
 	public String getDescription() {
@@ -37,7 +62,7 @@ public class Repository {
 	}
 
 	@JsonProperty("license")
-	private void unpackNameFromNestedObject(Map<String, String> license) {
+	private void unpackLicense(Map<String, String> license) {
 		if (license != null) {
 			licenseName = license.get("name");
 		}
@@ -57,5 +82,13 @@ public class Repository {
 
 	public void setHtmlUrl(String htmlUrl) {
 		this.htmlUrl = htmlUrl;
+	}
+
+	public int getStargazersCount() {
+		return stargazersCount;
+	}
+
+	public void setStargazersCount(int stargazersCount) {
+		this.stargazersCount = stargazersCount;
 	}
 }
