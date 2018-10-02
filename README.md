@@ -59,10 +59,18 @@ GitHub API URL:
 - Default order: descending
 - Default page: first
 
-Execute:
+Build and run:
 - `$ gradlew bootRun`
+- or
+- `$ gradlew clean build`
+- `$ java -jar build/libs/top-github-frameworks-1.0.jar`
+
+Invoke:
+- GET `localhost:8080/top`
+- GET `localhost:8080/top?username=AAA&password=BBB`
 
 References:
 - https://developer.github.com/v3/search/
 - https://github.com/FasterXML/jackson-annotations
 - https://www.baeldung.com/jackson-nested-values
+- https://www.baeldung.com/jackson-ignore-null-fields

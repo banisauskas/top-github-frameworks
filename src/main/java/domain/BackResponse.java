@@ -2,14 +2,15 @@ package domain;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class Response {
+/** Response from GitHub */
+public class BackResponse {
 
 	/** True when request timed out */
 	@JsonProperty("incomplete_results")
 	private boolean incompleteResults;
 
 	/** GitHub repositories */
-	private Repository[] items;
+	private BackRepository[] items;
 
 	public boolean getIncompleteResults() {
 		return incompleteResults;
@@ -19,11 +20,11 @@ public class Response {
 		this.incompleteResults = incompleteResults;
 	}
 
-	public Repository[] getItems() {
+	public BackRepository[] getItems() {
 		return items;
 	}
 
-	public void setItems(Repository[] items) {
+	public void setItems(BackRepository[] items) {
 		this.items = items;
 	}
 }

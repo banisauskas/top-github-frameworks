@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /** GitHub repository */
-public class Repository {
+public class BackRepository {
 
 	/** Name of repository */
 	private String name;
