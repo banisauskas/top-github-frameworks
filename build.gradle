@@ -27,7 +27,6 @@ repositories {
 
 dependencies {
 	compile("org.springframework.boot:spring-boot-starter-web:2.0.5.RELEASE")
-	compile("org.springframework:spring-web:5.0.9.RELEASE")
 	compile("com.fasterxml.jackson.core:jackson-databind:2.9.6")
 	testCompile("junit:junit:4.12")
 }

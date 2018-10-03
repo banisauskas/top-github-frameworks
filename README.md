@@ -50,14 +50,12 @@ To summarize, your REST API should expose endpoints to:
 
 ## -- Implementation --
 
-GitHub HTML URLs:
+GitHub HTML search pages that return desired results:
 - https://github.com/topics/framework?l=java&o=desc&s=stars
 - https://github.com/search?q=topic:framework&type=Repositories&l=Java&o=desc&s=stars
 
-GitHub API URL:
+Alternative GitHub API URL with the same results:
 - https://api.github.com/search/repositories?q=language:java+topic:framework&sort=stars&per_page=10
-- Default order: descending
-- Default page: first
 
 Build and run:
 - `$ gradlew bootRun`
@@ -65,9 +63,11 @@ Build and run:
 - `$ gradlew clean build`
 - `$ java -jar build/libs/top-github-frameworks-1.0.jar`
 
-Invoke:
-- GET `localhost:8080/top`
-- GET `localhost:8080/top?username=AAA&password=BBB`
+API endpoints:
+- GET `localhost:8080/top` without headers
+- GET `localhost:8080/top` with `Authorization` header (e.g. `Authorization: Basic dXNlcm5hbWU6cGFzc3dvcmQ=`)
+- PUT `localhost:8080/star/{owner}/{repo}` (e.g. `../star/spring-projects/spring-boot`) with `Authorization` header
+- DELETE `localhost:8080/star/{owner}/{repo}` with `Authorization` header
 
 References:
 - https://developer.github.com/v3/search/
