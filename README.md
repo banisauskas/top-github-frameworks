@@ -1,6 +1,6 @@
 # Top GitHub Frameworks
 
-## -- Assignment --
+## —— Assignment ——
 
 ## Functional Requirements
 
@@ -48,7 +48,7 @@ To summarize, your REST API should expose endpoints to:
 - Effectiveness of retrieving information from GitHub API
 - Simplicity of overall approach and lack of over-engineering
 
-## -- Implementation --
+## —— Implementation ——
 
 GitHub HTML search pages that return desired results:
 - https://github.com/topics/framework?l=java&o=desc&s=stars
@@ -59,18 +59,33 @@ Alternative GitHub API URL with the same results:
 
 Build and run:
 - `$ gradlew bootRun`
-- or
+  or
 - `$ gradlew clean build`
 - `$ java -jar build/libs/top-github-frameworks-1.0.jar`
-
-API endpoints:
-- GET `localhost:8080/top` without headers
-- GET `localhost:8080/top` with `Authorization` header (e.g. `Authorization: Basic dXNlcm5hbWU6cGFzc3dvcmQ=`)
-- PUT `localhost:8080/star/{owner}/{repo}` (e.g. `../star/spring-projects/spring-boot`) with `Authorization` header
-- DELETE `localhost:8080/star/{owner}/{repo}` with `Authorization` header
+  By default, APIs can be locally invoked using `localhost:8080/..` URL.
 
 References:
 - https://developer.github.com/v3/search/
-- https://github.com/FasterXML/jackson-annotations
-- https://www.baeldung.com/jackson-nested-values
-- https://www.baeldung.com/jackson-ignore-null-fields
+- https://developer.github.com/v3/repos/
+- https://developer.github.com/v3/activity/starring/
+
+## API `top` endpoint
+
+Retrieves 10 most active (as defined by the number of stars) GitHub Java frameworks.
+
+`GET /top` - sorted by the number of stars in descending order.
+`GET /top?orderByContribs=asc` - sorted by the number of contributors in ascending order.
+`GET /top?orderByContribs=desc` - sorted by the number of contributors in descending order.
+
+Optionally accepts `Authorization` header (e.g., `Authorization: Basic dXNlcm5hbWU6cGFzc3dvcmQ=`).
+
+## API `star` endpoint
+
+Stars or unstars 1 specified GitHub repository.
+
+`PUT /star/{owner}/{repo}`
+`DELETE /star/{owner}/{repo}`
+
+Requires `Authorization` header.
+
+An example to star Spring Boot repository: `PUT http://localhost:8080/star/spring-projects/spring-boot`

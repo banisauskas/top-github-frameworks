@@ -1,14 +1,23 @@
 package service;
 
-import static org.springframework.http.HttpMethod.*;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.HEAD;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
@@ -16,6 +25,7 @@ import domain.BackRepository;
 import domain.BackResponse;
 import domain.FrontRepository;
 
+@Service
 public class TopService {
 
 	/** Thread-safe */
@@ -25,19 +35,51 @@ public class TopService {
 	@Autowired
 	private CommonService commonService;
 
-	public FrontRepository[] processRepositories(String authorization) {
+	public ResponseEntity<FrontRepository[]> processRepositories(String orderByContribs, String authorization) {
+		// Order by
+		int orderBy; // -1, 0, +1
+		if (orderByContribs == null) {
+			orderBy = 0;
+		}
+		else if (orderByContribs.equals("asc")) {
+			orderBy = 1;
+		}
+		else if (orderByContribs.equals("desc")) {
+			orderBy = -1;
+		}
+		else {
+			return new ResponseEntity<>(BAD_REQUEST);
+		}
+
+		// Http entity
 		HttpEntity<Void> httpEntity = null;
 		if (authorization != null) {
 			httpEntity = commonService.createHttpEntity(authorization);
 		}
 
-		ResponseEntity<BackResponse> backResponseEntity =
-			template.exchange("https://api.github.com/search/repositories?q=language:java+topic:framework&sort=stars&per_page=10", GET, httpEntity, BackResponse.class);
+		// Retrieve repos from GitHub
+		BackResponse backResponse;
 
-		BackResponse backResponse = backResponseEntity.getBody();
+		try {
+			ResponseEntity<BackResponse> backResponseEntity =
+				template.exchange("https://api.github.com/search/repositories?q=language:java+topic:framework&sort=stars&per_page=10", GET, httpEntity, BackResponse.class);
 
-		// TODO backResponse.getIncompleteResults()
+			backResponse = backResponseEntity.getBody();
+		}
+		catch (HttpClientErrorException e) {
+			if (e.getStatusCode() == UNAUTHORIZED) {
+				return new ResponseEntity<>(UNAUTHORIZED);
+			}
+			else {
+				throw e;
+			}
+		}
 
+		if (backResponse.getIncompleteResults()) {
+			return new ResponseEntity<>(INTERNAL_SERVER_ERROR);
+		}
+
+		// Fill additional fields to each retrieved repo
 		BackRepository[] backRepos = backResponse.getItems();
 		FrontRepository[] frontRepos = new FrontRepository[backRepos.length];
 
@@ -45,7 +87,16 @@ public class TopService {
 			frontRepos[i] = processRepository(backRepos[i], httpEntity);
 		}
 
-		return frontRepos;
+		// Order by contributors
+		if (orderBy == 1) {
+			Arrays.sort(frontRepos);
+		}
+		else if (orderBy == -1) {
+			Arrays.sort(frontRepos, Collections.reverseOrder());
+		}
+
+		// Success response
+		return new ResponseEntity<>(frontRepos, OK);
 	}
 
 	private FrontRepository processRepository(BackRepository backRepo, HttpEntity<Void> httpEntity) {
@@ -53,19 +104,26 @@ public class TopService {
 		String repoOwner = backRepo.getOwnerLogin();
 		String repoName = backRepo.getName();
 
+		// Name
 		frontRepo.setName(backRepo.getName());
 
+		// Description
 		frontRepo.setDescription(backRepo.getDescription());
 
+		// Stars
 		frontRepo.setStars(backRepo.getStargazersCount());
 
+		// License name
 		frontRepo.setLicenseName(backRepo.getLicenseName());
 
+		// Link
 		frontRepo.setLink(backRepo.getHtmlUrl());
 
+		// Contributors
 		int contributors = retrieveContributors(repoOwner, repoName, httpEntity);
 		frontRepo.setContributors(contributors);
 
+		// Starred by me
 		if (httpEntity != null) {
 			boolean starred = determineIfStarredByMe(repoOwner, repoName, httpEntity);
 			frontRepo.setStarredByMe(starred);
@@ -74,9 +132,14 @@ public class TopService {
 		return frontRepo;
 	}
 
+	/** GitHub returns 200 when the 1st page contains 1 result, or 204 when 0 results */
 	private int retrieveContributors(String owner, String repository, HttpEntity<Void> httpEntity) {
 		ResponseEntity<Void> backResponseEntity =
 			template.exchange("https://api.github.com/repos/{owner}/{repository}/contributors?per_page=1&anon=true", HEAD, httpEntity, Void.class, owner, repository);
+
+		if (backResponseEntity.getStatusCode() == NO_CONTENT) {
+			return 0; // the 1st page is empty, so there are 0 contributors
+		}
 
 		List<String> links = backResponseEntity.getHeaders().get(HttpHeaders.LINK);
 		if (links == null) {
@@ -102,28 +165,21 @@ public class TopService {
 		return Integer.parseInt(link.substring(start + 5, end));
 	}
 
+	/** GitHub returns 204 when starred, or 404 when not starred */
 	private boolean determineIfStarredByMe(String owner, String repository, HttpEntity<Void> httpEntity) {
-		boolean starred = true;
-
 		try {
 			ResponseEntity<Void> response =
 				template.exchange("https://api.github.com/user/starred/{owner}/{repository}", GET, httpEntity, Void.class, owner, repository);
 
-			if (response.getStatusCode() != HttpStatus.NO_CONTENT) {
-				throw new RuntimeException("Incorrect starred response status code");
-			}
+			return response.getStatusCode() == NO_CONTENT;
 		}
 		catch (HttpClientErrorException e) {
-			HttpStatus status = e.getStatusCode();
-
-			if (status == HttpStatus.NOT_FOUND) {
-				starred = false;
+			if (e.getStatusCode() == NOT_FOUND) {
+				return false;
 			}
 			else {
 				throw e;
 			}
 		}
-
-		return starred;
 	}
 }

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
 /** GitHub repository */
-public class FrontRepository {
+public class FrontRepository implements Comparable<FrontRepository> {
 
 	/** Repository name */
 	private String name;
@@ -27,6 +27,11 @@ public class FrontRepository {
 	/** Whether current user has put a star on this repository */
 	@JsonInclude(Include.NON_NULL)
 	private Boolean starredByMe;
+
+	/** Repository is considered "bigger" if it has more contributors */
+	public int compareTo(FrontRepository other) {
+		return contributors - other.contributors;
+	}
 
 	public String getName() {
 		return name;

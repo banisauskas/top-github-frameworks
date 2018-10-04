@@ -2,7 +2,9 @@ package service;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+import org.springframework.stereotype.Service;
 
+@Service
 public class CommonService {
 
 	/** Creates a request with 'Authorization' header and no body */
