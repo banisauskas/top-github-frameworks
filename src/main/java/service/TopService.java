@@ -105,7 +105,7 @@ public class TopService {
 		String repoName = backRepo.getName();
 
 		// Name
-		frontRepo.setName(backRepo.getName());
+		frontRepo.setName(repoName);
 
 		// Description
 		frontRepo.setDescription(backRepo.getDescription());
