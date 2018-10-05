@@ -1,6 +1,7 @@
 plugins {
 	id "org.springframework.boot" version "2.0.5.RELEASE"
 	id "io.spring.dependency-management" version "1.0.6.RELEASE"
+	id "com.palantir.docker" version "0.20.1"
 }
 
 apply plugin: 'java'
@@ -8,11 +9,6 @@ apply plugin: 'eclipse' // needed only if Eclipse is used
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
-
-bootJar {
-	baseName = 'top-github-frameworks'
-	version = '1.0'
-}
 
 repositories {
 	mavenCentral()
@@ -24,4 +20,22 @@ dependencies {
 	testCompile("junit:junit:4.12")
 	testCompile("org.springframework.boot:spring-boot-starter-test:2.0.5.RELEASE")
 	testCompile("org.springframework.security:spring-security-test:5.0.8.RELEASE")
+}
+
+/* SPRING BOOT */
+
+bootJar {
+	baseName = 'top-github-frameworks'
+	version = '1.0'
+}
+
+/* DOCKER */
+
+group = 'banisauskas'
+
+docker {
+	dependsOn build
+	name "${project.group}/${bootJar.baseName}"
+	files bootJar.archivePath
+	buildArgs(['JAR_FILE': "${bootJar.archiveName}"])
 }
